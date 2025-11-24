@@ -27,6 +27,95 @@ class _HomePageState extends State<HomePage> {
     _reloadHorses();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Catálogo de Cavalos",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.brown,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.white),
+        actions: <Widget>[
+          PopupMenuButton<OrderOptions>(
+            icon: Icon(Icons.sort, color: Colors.white),
+            onSelected: _orderList,
+            itemBuilder: (context) => <PopupMenuEntry<OrderOptions>>[
+              const PopupMenuItem<OrderOptions>(
+                value: OrderOptions.orderAZ,
+                child: Text("Ordenar por Nome (A-Z)"),
+              ),
+              const PopupMenuItem<OrderOptions>(
+                value: OrderOptions.orderZA,
+                child: Text("Ordenar por Nome (Z-A)"),
+              ),
+              const PopupMenuItem<OrderOptions>(
+                value: OrderOptions.orderWinsDesc,
+                child: Text("Ordenar por Vitórias (Maior)"),
+              ),
+              const PopupMenuItem<OrderOptions>(
+                value: OrderOptions.orderWinsAsc,
+                child: Text("Ordenar por Vitórias (Menor)"),
+              ),
+            ],
+          ),
+        ],
+      ),
+      backgroundColor: Colors.brown[50],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          _showHorsePage();
+        },
+        backgroundColor: Colors.brown,
+        icon: Icon(Icons.add, color: Colors.white),
+        label: Text("Adicionar", style: TextStyle(color: Colors.white)),
+      ),
+      body: Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: Lottie.asset(
+              'assets/horse_steps.json',
+              fit: BoxFit.cover,
+              repeat: true,
+            ),
+          ),
+
+          horses.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.sentiment_dissatisfied,
+                        size: 80,
+                        color: Colors.grey[400],
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        "Nenhum cavalo cadastrado.",
+                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                      ),
+                      Text(
+                        "Toque no '+' para adicionar.",
+                        style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: EdgeInsets.all(8.0),
+                  itemCount: horses.length,
+                  itemBuilder: (context, index) {
+                    return _horseCard(context, index);
+                  },
+                ),
+        ],
+      ),
+    );
+  }
+
   void _reloadHorses() {
     horseHelper.getAllHorses().then((list) {
       setState(() {
@@ -106,6 +195,7 @@ class _HomePageState extends State<HomePage> {
       ),
       builder: (context) {
         return Container(
+          color: Colors.brown[50],
           padding: EdgeInsets.all(20.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -356,95 +446,6 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Catálogo de Cavalos",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.brown,
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: <Widget>[
-          PopupMenuButton<OrderOptions>(
-            icon: Icon(Icons.sort, color: Colors.white),
-            onSelected: _orderList,
-            itemBuilder: (context) => <PopupMenuEntry<OrderOptions>>[
-              const PopupMenuItem<OrderOptions>(
-                value: OrderOptions.orderAZ,
-                child: Text("Ordenar por Nome (A-Z)"),
-              ),
-              const PopupMenuItem<OrderOptions>(
-                value: OrderOptions.orderZA,
-                child: Text("Ordenar por Nome (Z-A)"),
-              ),
-              const PopupMenuItem<OrderOptions>(
-                value: OrderOptions.orderWinsDesc,
-                child: Text("Ordenar por Vitórias (Maior)"),
-              ),
-              const PopupMenuItem<OrderOptions>(
-                value: OrderOptions.orderWinsAsc,
-                child: Text("Ordenar por Vitórias (Menor)"),
-              ),
-            ],
-          ),
-        ],
-      ),
-      backgroundColor: Colors.brown[50],
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _showHorsePage();
-        },
-        backgroundColor: Colors.brown,
-        icon: Icon(Icons.add, color: Colors.white),
-        label: Text("Adicionar", style: TextStyle(color: Colors.white)),
-      ),
-      body: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: Lottie.asset(
-              'assets/horse_steps.json',
-              fit: BoxFit.cover,
-              repeat: true,
-            ),
-          ),
-
-          horses.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.sentiment_dissatisfied,
-                        size: 80,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        "Nenhum cavalo cadastrado.",
-                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                      ),
-                      Text(
-                        "Toque no '+' para adicionar.",
-                        style: TextStyle(fontSize: 16, color: Colors.grey[500]),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: EdgeInsets.all(8.0),
-                  itemCount: horses.length,
-                  itemBuilder: (context, index) {
-                    return _horseCard(context, index);
-                  },
-                ),
-        ],
       ),
     );
   }

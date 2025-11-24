@@ -276,19 +276,9 @@ class _HorsePageState extends State<HorsePage> {
                             labelText: "Total de Vitórias",
                             keyboardType: TextInputType.number,
                             inputFormatters: [numberInputFormatter],
-
                             onChanged: (text) {
                               _userEdited = true;
                               _editHorse?.totalWins = int.tryParse(text) ?? 0;
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Obrigatório!';
-                              }
-                              if (int.tryParse(value)! < 0) {
-                                return 'Não pode ser negativo.';
-                              }
-                              return null;
                             },
                           ),
                         ),
@@ -454,6 +444,18 @@ class _HorsePageState extends State<HorsePage> {
           SnackBar(
             content: Text(
               "Se houver vitórias, a Data da Última Vitória é obrigatória (DD/MM/AAAA).",
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      if (dateText.isNotEmpty &&
+          (_editHorse!.totalWins == null || _editHorse!.totalWins! == 0)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Se a Data da Última Vitória for preenchida, o Total de Vitórias deve ser maior que zero.",
             ),
             backgroundColor: Colors.red,
           ),
