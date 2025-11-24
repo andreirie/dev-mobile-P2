@@ -391,6 +391,19 @@ class _HorsePageState extends State<HorsePage> {
   }) {
     String? valueToUse = options.contains(currentValue) ? currentValue : null;
 
+    List<DropdownMenuItem<String>> dropdownItems = options.map((String option) {
+      return DropdownMenuItem<String>(value: option, child: Text(option));
+    }).toList();
+
+    dropdownItems.insert(
+      0,
+      const DropdownMenuItem<String>(value: null, child: Text("-")),
+    );
+
+    valueToUse = currentValue == null || !options.contains(currentValue)
+        ? null
+        : currentValue;
+
     return DropdownButtonFormField<String>(
       value: valueToUse,
       dropdownColor: Colors.brown[50],
@@ -400,9 +413,7 @@ class _HorsePageState extends State<HorsePage> {
         contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
       ),
       hint: const Text("Selecione"),
-      items: options.map((String option) {
-        return DropdownMenuItem<String>(value: option, child: Text(option));
-      }).toList(),
+      items: dropdownItems,
       onChanged: onChanged,
       validator: (value) {
         if (value == null || value.isEmpty) {

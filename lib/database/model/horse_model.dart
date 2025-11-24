@@ -16,7 +16,7 @@ class Horse {
   String coatColor;
   String gender;
   int totalRaces;
-  int totalWins;
+  int? totalWins;
   int? lastVictoryDate;
   String? image;
 
@@ -27,7 +27,7 @@ class Horse {
     required this.coatColor,
     required this.gender,
     required this.totalRaces,
-    required this.totalWins,
+    this.totalWins,
     this.lastVictoryDate,
     this.image,
   });
