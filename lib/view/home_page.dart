@@ -347,8 +347,9 @@ class _HomePageState extends State<HomePage> {
                 width: 70.0,
                 height: 70.0,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey[300]!, width: 2.0),
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(15.0),
+                  border: Border.all(color: Colors.brown, width: 2.0),
                   image: DecorationImage(
                     image: horse.image != null && horse.image!.isNotEmpty
                         ? FileImage(File(horse.image!))

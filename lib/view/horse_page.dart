@@ -5,7 +5,6 @@ import 'package:apk_catalogo/database/model/horse_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class HorsePage extends StatefulWidget {
   final Horse? horse;
@@ -39,11 +38,6 @@ class _HorsePageState extends State<HorsePage> {
     RegExp(r'[0-9]'),
   );
 
-  final dateMask = MaskTextInputFormatter(
-    mask: '##/##/####',
-    filter: {"#": RegExp(r'[0-9]')},
-  );
-
   @override
   void initState() {
     super.initState();
@@ -66,12 +60,19 @@ class _HorsePageState extends State<HorsePage> {
       _totalRacesController.text = _editHorse?.totalRaces.toString() ?? "";
       _totalWinsController.text = _editHorse?.totalWins.toString() ?? "";
 
-      _lastVictoryDateController.text =
-          _editHorse?.lastVictoryDate.toString() == "0"
-          ? ""
-          : dateMask.maskText(
-              _editHorse!.lastVictoryDate.toString().padLeft(8, '0'),
-            );
+      if (_editHorse?.lastVictoryDate != 0 &&
+          _editHorse!.lastVictoryDate.toString().length == 8) {
+        String dateString = _editHorse!.lastVictoryDate.toString().padLeft(
+          8,
+          '0',
+        );
+        String day = dateString.substring(0, 2);
+        String month = dateString.substring(2, 4);
+        String year = dateString.substring(4, 8);
+        _lastVictoryDateController.text = "$day/$month/$year";
+      } else {
+        _lastVictoryDateController.text = "";
+      }
     }
   }
 
@@ -84,6 +85,58 @@ class _HorsePageState extends State<HorsePage> {
     _totalWinsController.dispose();
     _lastVictoryDateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now();
+
+    if (_editHorse?.lastVictoryDate != 0 &&
+        _editHorse!.lastVictoryDate.toString().length == 8) {
+      final dateString = _editHorse!.lastVictoryDate.toString().padLeft(8, '0');
+      final day = int.tryParse(dateString.substring(0, 2)) ?? 1;
+      final month = int.tryParse(dateString.substring(2, 4)) ?? 1;
+      final year =
+          int.tryParse(dateString.substring(4, 8)) ?? DateTime.now().year;
+
+      try {
+        initialDate = DateTime(year, month, day);
+      } catch (_) {
+        initialDate = DateTime.now();
+      }
+    }
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.brown,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.brown[50],
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      _userEdited = true;
+      setState(() {
+        final day = picked.day.toString().padLeft(2, '0');
+        final month = picked.month.toString().padLeft(2, '0');
+        final year = picked.year.toString();
+        _lastVictoryDateController.text = "$day/$month/$year";
+
+        _editHorse?.lastVictoryDate = int.parse("$day$month$year");
+      });
+    }
   }
 
   @override
@@ -100,14 +153,6 @@ class _HorsePageState extends State<HorsePage> {
         ),
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.white),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _saveHorse();
-        },
-        backgroundColor: Colors.brown,
-        icon: Icon(Icons.save, color: Colors.white),
-        label: Text("Salvar", style: TextStyle(color: Colors.white)),
       ),
       body: WillPopScope(
         onWillPop: _requestPop,
@@ -129,7 +174,8 @@ class _HorsePageState extends State<HorsePage> {
                             width: 150.0,
                             height: 150.0,
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(15.0),
                               border: Border.all(
                                 color: Colors.brown,
                                 width: 3.0,
@@ -150,7 +196,6 @@ class _HorsePageState extends State<HorsePage> {
                     ),
                   ),
                 ),
-
                 _buildInfoCard(
                   title: "Informações Básicas",
                   children: [
@@ -192,8 +237,9 @@ class _HorsePageState extends State<HorsePage> {
                               if (value == null || value.isEmpty) {
                                 return 'Obrigatório!';
                               }
-                              if (int.tryParse(value)! < 0) {
-                                return 'Não pode ser negativo.';
+                              if (int.tryParse(value)! <= 0 ||
+                                  int.tryParse(value)! > 40) {
+                                return 'Idade inválida.';
                               }
                               return null;
                             },
@@ -240,9 +286,7 @@ class _HorsePageState extends State<HorsePage> {
                     ),
                   ],
                 ),
-
                 SizedBox(height: 16.0),
-
                 _buildInfoCard(
                   title: "Estatísticas de Corrida",
                   children: [
@@ -280,23 +324,48 @@ class _HorsePageState extends State<HorsePage> {
                               _userEdited = true;
                               _editHorse?.totalWins = int.tryParse(text) ?? 0;
                             },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Obrigatório!';
+                              }
+                              if (int.tryParse(value)! < 0) {
+                                return 'Não pode ser negativo.';
+                              }
+                              return null;
+                            },
                           ),
                         ),
                       ],
                     ),
                     SizedBox(height: 12.0),
-                    _buildTextFormField(
+                    _buildDateFormField(
+                      labelText: "Data da Última Vitória",
                       controller: _lastVictoryDateController,
-                      labelText: "Data da Última Vitória (DD/MM/AAAA)",
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [dateMask],
-                      onChanged: (text) {
-                        _userEdited = true;
-                        _editHorse?.lastVictoryDate =
-                            int.tryParse(dateMask.getUnmaskedText()) ?? 0;
-                      },
+                      onTap: () => _selectDate(context),
                     ),
                   ],
+                ),
+                SizedBox(height: 24.0),
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: _saveHorse,
+                    icon: Icon(Icons.save, color: Colors.white),
+                    label: Text(
+                      "Salvar",
+                      style: TextStyle(color: Colors.white, fontSize: 16.0),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.brown,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 40.0,
+                        vertical: 15.0,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      elevation: 4.0,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -365,22 +434,23 @@ class _HorsePageState extends State<HorsePage> {
     );
   }
 
-  bool _isDateValid(String dateString) {
-    if (dateString.length != 8) return false;
-
-    try {
-      final day = int.parse(dateString.substring(0, 2));
-      final month = int.parse(dateString.substring(2, 4));
-      final year = int.parse(dateString.substring(4, 8));
-
-      final dateTime = DateTime.utc(year, month, day);
-
-      return dateTime.year == year &&
-          dateTime.month == month &&
-          dateTime.day == day;
-    } catch (e) {
-      return false;
-    }
+  Widget _buildDateFormField({
+    required String labelText,
+    required TextEditingController controller,
+    required VoidCallback onTap,
+  }) {
+    return TextFormField(
+      controller: controller,
+      readOnly: true,
+      style: TextStyle(fontWeight: FontWeight.bold),
+      decoration: InputDecoration(
+        labelText: labelText,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
+        suffixIcon: Icon(Icons.calendar_today, color: Colors.brown),
+      ),
+      onTap: onTap,
+    );
   }
 
   Widget _buildDropdownFormField({
@@ -448,48 +518,26 @@ class _HorsePageState extends State<HorsePage> {
         return;
       }
 
-      final dateText = _lastVictoryDateController.text.replaceAll('/', '');
+      final dateValue = _editHorse!.lastVictoryDate;
 
-      if (_editHorse!.totalWins! > 0 && dateText.isEmpty) {
+      if (_editHorse!.totalWins! > 0 && dateValue == 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "Se houver vitórias, a Data da Última Vitória é obrigatória (DD/MM/AAAA).",
+              "Se houver vitórias, a Data da Última Vitória é obrigatória.",
             ),
             backgroundColor: Colors.red,
           ),
         );
         return;
       }
-      if (dateText.isNotEmpty &&
+
+      if (dateValue != 0 &&
           (_editHorse!.totalWins == null || _editHorse!.totalWins! == 0)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               "Se a Data da Última Vitória for preenchida, o Total de Vitórias deve ser maior que zero.",
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-      if (dateText.isNotEmpty && dateText.length != 8) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Formato de data da última vitória incompleto. Use DD/MM/AAAA.",
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      if (dateText.isNotEmpty && !_isDateValid(dateText)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Data da última vitória inválida. Verifique o dia/mês/ano (DD/MM/AAAA).",
             ),
             backgroundColor: Colors.red,
           ),
