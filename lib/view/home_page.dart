@@ -81,7 +81,6 @@ class _HomePageState extends State<HomePage> {
               repeat: true,
             ),
           ),
-
           horses.isEmpty
               ? Center(
                   child: Column(
@@ -287,9 +286,15 @@ class _HomePageState extends State<HomePage> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14.0, color: Colors.grey[600]),
+        Icon(icon, size: 12.0, color: Colors.grey[600]),
         SizedBox(width: 4.0),
-        Text(label, style: TextStyle(fontSize: 14.0, color: Colors.grey[700])),
+        Flexible(
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 12.0, color: Colors.grey[700]),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }
@@ -299,25 +304,37 @@ class _HomePageState extends State<HomePage> {
     required String count,
     required String label,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 16.0, color: Colors.orange),
-            SizedBox(width: 4.0),
-            Text(
-              count,
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 16.0, color: Colors.brown[700]),
+              SizedBox(width: 4.0),
+              Flexible(
+                child: Text(
+                  count,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.brown[900],
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-          ],
-        ),
-        Text(label, style: TextStyle(fontSize: 12.0, color: Colors.grey)),
-      ],
+            ],
+          ),
+          SizedBox(height: 2.0),
+          Text(
+            label,
+            style: TextStyle(fontSize: 10.0, color: Colors.grey[600]),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
@@ -330,122 +347,140 @@ class _HomePageState extends State<HomePage> {
     );
 
     return Card(
-      elevation: 4.0,
+      elevation: 6.0,
       color: Colors.white,
-      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       child: InkWell(
         onTap: () {
           _showOptions(context, index);
         },
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                width: 70.0,
-                height: 70.0,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            // --- Seção da Imagem ---
+            Container(
+              height: 180.0, // Aumentando a altura da imagem
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(13.0)),
+                image: DecorationImage(
+                  image: horse.image != null && horse.image!.isNotEmpty
+                      ? FileImage(File(horse.image!))
+                      : AssetImage("assets/horse.png") as ImageProvider,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                // Adiciona um gradiente para o texto ficar mais legível
                 decoration: BoxDecoration(
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(15.0),
-                  border: Border.all(color: Colors.brown, width: 2.0),
-                  image: DecorationImage(
-                    image: horse.image != null && horse.image!.isNotEmpty
-                        ? FileImage(File(horse.image!))
-                        : AssetImage("assets/horse.png") as ImageProvider,
-                    fit: BoxFit.cover,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(13.0),
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black.withOpacity(0.5)],
                   ),
                 ),
-              ),
-              SizedBox(width: 16.0),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      horse.name ?? "Nome Desconhecido",
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.brown,
+                alignment: Alignment.bottomLeft,
+                padding: EdgeInsets.fromLTRB(16.0, 0, 16.0, 8.0),
+                child: Text(
+                  horse.name ?? "Nome Desconhecido",
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white, // Nome em branco para destaque
+                    shadows: [
+                      Shadow(
+                        blurRadius: 3.0,
+                        color: Colors.black,
+                        offset: Offset(1.0, 1.0),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4.0),
-                    Wrap(
-                      spacing: 12.0,
-                      runSpacing: 4.0,
-                      children: <Widget>[
-                        _buildDetailChip(
-                          icon: Icons.access_time,
-                          label: "${horse.age} anos",
-                        ),
-                        _buildDetailChip(
-                          icon: Icons.pets,
-                          label: horse.gender ?? "Não Informado",
-                        ),
-                        _buildDetailChip(
-                          icon: Icons.palette,
-                          label: horse.coatColor ?? "Cor Indefinida",
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8.0),
-                    Row(
-                      children: [
-                        _buildStatColumn(
-                          icon: Icons.emoji_events,
-                          count: horse.totalWins.toString(),
-                          label: "Vitórias",
-                        ),
-                        SizedBox(width: 16.0),
-                        _buildStatColumn(
-                          icon: Icons.directions_run,
-                          count: horse.totalRaces.toString(),
-                          label: "Corridas",
-                        ),
-                        SizedBox(width: 16.0),
-                        _buildStatColumn(
-                          icon: Icons.trending_up,
-                          count: winRatio,
-                          label: "Percentual de Vitórias",
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 14.0,
-                            color: Colors.grey[600],
-                          ),
-                          SizedBox(width: 4.0),
-                          Text(
-                            "Última Vitória: ",
-                            style: TextStyle(
-                              fontSize: 14.0,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          Text(
-                            formattedDate,
-                            style: TextStyle(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ],
-          ),
+            ),
+            // --- Seção de Detalhes e Estatísticas ---
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  // Chips de Detalhes
+                  Wrap(
+                    spacing: 8.0,
+                    runSpacing: 4.0,
+                    children: <Widget>[
+                      _buildDetailChip(
+                        icon: Icons.access_time,
+                        label: "${horse.age} anos",
+                      ),
+                      _buildDetailChip(
+                        icon: Icons.pets,
+                        label: horse.gender ?? "Não Informado",
+                      ),
+                      _buildDetailChip(
+                        icon: Icons.palette,
+                        label: horse.coatColor ?? "Cor Indefinida",
+                      ),
+                    ],
+                  ),
+                  Divider(height: 16.0, color: Colors.grey[300]),
+                  // Colunas de Estatísticas
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatColumn(
+                        icon: Icons.emoji_events,
+                        count: horse.totalWins.toString(),
+                        label: "Vitórias",
+                      ),
+                      _buildStatColumn(
+                        icon: Icons.directions_run,
+                        count: horse.totalRaces.toString(),
+                        label: "Corridas",
+                      ),
+                      _buildStatColumn(
+                        icon: Icons.trending_up,
+                        count: winRatio,
+                        label: "Taxa de Vitórias",
+                      ),
+                    ],
+                  ),
+                  Divider(height: 16.0, color: Colors.grey[300]),
+                  // Última Vitória
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        size: 14.0,
+                        color: Colors.brown,
+                      ),
+                      SizedBox(width: 6.0),
+                      Text(
+                        "Última Vitória: ",
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      Text(
+                        formattedDate,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.brown[900],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
