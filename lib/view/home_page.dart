@@ -358,9 +358,8 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            // --- Seção da Imagem ---
             Container(
-              height: 180.0, // Aumentando a altura da imagem
+              height: 180.0, 
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(13.0)),
                 image: DecorationImage(
@@ -371,7 +370,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               child: Container(
-                // Adiciona um gradiente para o texto ficar mais legível
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(13.0),
@@ -389,7 +387,7 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(
                     fontSize: 24.0,
                     fontWeight: FontWeight.w900,
-                    color: Colors.white, // Nome em branco para destaque
+                    color: Colors.white, 
                     shadows: [
                       Shadow(
                         blurRadius: 3.0,
@@ -402,13 +400,11 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            // --- Seção de Detalhes e Estatísticas ---
             Padding(
               padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  // Chips de Detalhes
                   Wrap(
                     spacing: 8.0,
                     runSpacing: 4.0,
@@ -428,7 +424,6 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   Divider(height: 16.0, color: Colors.grey[300]),
-                  // Colunas de Estatísticas
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -450,7 +445,6 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   Divider(height: 16.0, color: Colors.grey[300]),
-                  // Última Vitória
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
